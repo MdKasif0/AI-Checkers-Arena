@@ -6,12 +6,12 @@ import { Crown, Sun, User, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/utils/supabase/client";
 import { type User as SupabaseUser } from "@supabase/supabase-js";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 export function Navbar() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
