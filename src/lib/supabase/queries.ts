@@ -151,8 +151,23 @@ export async function updateModelStats(
   const whiteMoves = matchMoves.filter((m) => m.player === "white");
   const blackMoves = matchMoves.filter((m) => m.player === "black");
 
+  interface ModelStats {
+    wins: number;
+    losses: number;
+    draws: number;
+    avg_move_latency_ms: number;
+    avg_tokens: number;
+    illegal_move_rate: number;
+    rating: number;
+  }
+
   // Helper to aggregate stats weighting by number of matches played
-  const aggregate = (currentStats: any, newMoves: any[], isWin: boolean, isDraw: boolean) => {
+  const aggregate = (
+    currentStats: ModelStats,
+    newMoves: Array<{ latency_ms: number; tokens_used: number; was_illegal_attempt: boolean }>,
+    isWin: boolean,
+    isDraw: boolean
+  ) => {
     const matchesPlayed = currentStats.wins + currentStats.losses + currentStats.draws;
     
     let matchLatencySum = 0;
@@ -198,4 +213,27 @@ export async function updateModelStats(
     { model_id: whiteModel, ...newWhiteStats },
     { model_id: blackModel, ...newBlackStats },
   ]);
+}
+
+/**
+ * Fetches the complete match and its move history.
+ */
+export async function getMatchState(matchId: string) {
+  const { data: match, error: matchError } = await supabase
+    .from("matches")
+    .select("*")
+    .eq("id", matchId)
+    .single();
+
+  if (matchError || !match) throw new Error("Match not found");
+
+  const { data: moves, error: movesError } = await supabase
+    .from("moves")
+    .select("*")
+    .eq("match_id", matchId)
+    .order("ply_number", { ascending: true });
+
+  if (movesError) throw movesError;
+
+  return { match, moves: moves || [] };
 }
