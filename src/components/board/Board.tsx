@@ -38,12 +38,12 @@ export function Board({ board, lastMove }: BoardProps) {
           key={`${row}-${col}`}
           className={`
             relative w-full h-full flex items-start justify-end p-1
-            ${isPlayable ? "bg-charcoal-900" : "bg-charcoal-700"}
-            ${isLastMoveSq ? "after:absolute after:inset-0 after:bg-amber-500/20 after:pointer-events-none" : ""}
+            ${isPlayable ? "bg-[#b05f3c]" : "bg-[#ecd3a9]"}
+            ${isLastMoveSq ? "after:absolute after:inset-0 after:bg-[#8bc34a]/30 after:border-4 after:border-[#8bc34a] after:pointer-events-none after:z-20" : ""}
           `}
         >
           {isPlayable && sq && (
-            <span className="text-[0.65rem] text-charcoal-500 font-mono leading-none select-none">
+            <span className="text-[0.65rem] text-black/30 font-mono leading-none select-none">
               {sq}
             </span>
           )}
@@ -53,7 +53,10 @@ export function Board({ board, lastMove }: BoardProps) {
   }
 
   return (
-    <div className="relative w-full max-w-2xl mx-auto aspect-square border-4 border-charcoal-950 rounded-md overflow-hidden bg-charcoal-950 shadow-2xl">
+    <div className="relative w-full max-w-2xl mx-auto aspect-square border-[16px] border-[#915e37] rounded-sm bg-[#5c351c] shadow-[0_10px_30px_rgba(0,0,0,0.8)] overflow-hidden">
+      {/* Inner shadow to give the wood frame depth */}
+      <div className="absolute inset-0 shadow-[inset_0_0_20px_rgba(0,0,0,0.8)] pointer-events-none z-30" />
+      
       <div className="absolute inset-0 grid grid-cols-10 grid-rows-10">
         {cells}
       </div>
