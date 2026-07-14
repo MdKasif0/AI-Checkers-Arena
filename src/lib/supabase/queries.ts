@@ -237,3 +237,30 @@ export async function getMatchState(matchId: string) {
 
   return { match, moves: moves || [] };
 }
+
+/**
+ * Fetches recent matches for the history page.
+ */
+export async function getMatchHistory() {
+  const { data, error } = await supabase
+    .from("matches")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(100);
+    
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Fetches the leaderboard of model stats.
+ */
+export async function getLeaderboard() {
+  const { data, error } = await supabase
+    .from("model_stats")
+    .select("*")
+    .order("rating", { ascending: false });
+    
+  if (error) throw error;
+  return data;
+}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Space_Grotesk, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Navbar } from "@/components/layout/Navbar";
 
 const playfairDisplay = Playfair_Display({
   variable: "--font-playfair-display",
@@ -40,7 +41,12 @@ export default function RootLayout({
       lang="en"
       className={`${playfairDisplay.variable} ${spaceGrotesk.variable} ${geistMono.variable} dark h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-charcoal-950 text-white">
+        <Navbar />
+        <main className="flex-1 flex flex-col">
+          {children}
+        </main>
+      </body>
     </html>
   );
 }
