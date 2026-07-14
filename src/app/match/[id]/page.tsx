@@ -13,11 +13,13 @@ export default async function MatchPage({ params }: PageProps) {
   
   if (!id) return notFound();
 
+  let matchState;
   try {
-    const { match, moves } = await getMatchState(id);
-    return <MatchViewer match={match} initialMoves={moves} />;
+    matchState = await getMatchState(id);
   } catch (error) {
     console.error("Failed to load match:", error);
     return notFound();
   }
+
+  return <MatchViewer match={matchState.match} initialMoves={matchState.moves} />;
 }

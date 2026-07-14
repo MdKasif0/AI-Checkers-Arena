@@ -8,7 +8,47 @@ export async function startMatch(formData: FormData) {
   const blackModel = formData.get("blackModel") as string;
 
   if (!whiteModel || !blackModel) {
-    throw new Error("Both models are required");
+    return { error: "Both models are required" };
+  }
+
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    return { error: "OPENROUTER_API_KEY is missing on server" };
+  }
+
+  // Pre-flight check: Ping both models to ensure access and validity
+  const pingModel = async (modelId: string) => {
+    try {
+      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: modelId,
+          messages: [{ role: "user", content: "ping" }],
+          max_tokens: 1
+        }),
+        signal: AbortSignal.timeout(5000)
+      });
+      if (!res.ok) {
+        let msg = res.statusText;
+        try {
+          const body = await res.json();
+          msg = body.error?.message || msg;
+        } catch { /* empty */ }
+        throw new Error(`${res.status}: ${msg}`);
+      }
+    } catch (e) {
+      throw new Error(`Failed to access ${modelId}. Reason: ${(e as Error).message}`);
+    }
+  };
+
+  try {
+    await Promise.all([pingModel(whiteModel), pingModel(blackModel)]);
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : String(error) };
   }
 
   const match = await createMatch({ whiteModel, blackModel });

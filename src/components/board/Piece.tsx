@@ -15,7 +15,6 @@ export function Piece({ piece }: PieceProps) {
 
   const isWhite = piece.player === "white";
   const bgColor = isWhite ? "bg-[#eaddcf]" : "bg-[#c55d31]";
-  const shadowColor = "rgba(0,0,0,0.6)";
 
   return (
     <motion.div
