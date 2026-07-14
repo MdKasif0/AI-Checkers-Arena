@@ -179,14 +179,14 @@ export function ModelSelector({ models }: ModelSelectorProps) {
             onClick={() => { setMode("ai_vs_ai"); setActiveSelection("white"); }}
             className={`relative px-8 py-3 rounded-full text-sm font-bold uppercase tracking-wider transition-colors z-10 ${mode === "ai_vs_ai" ? "text-amber-950" : "text-charcoal-400 hover:text-charcoal-200"}`}
           >
-            {mode === "ai_vs_ai" && <motion.div layoutId="mode-bg" className="absolute inset-0 bg-gradient-to-r from-[#D4AF37] to-[#E5C76B] rounded-full -z-10 shadow-lg" transition={{ type: "spring", stiffness: 400, damping: 30 }} />}
+            {mode === "ai_vs_ai" && <motion.div layoutId="mode-bg" className="absolute inset-0 bg-gradient-to-r from-amber-500 to-amber-400 rounded-full -z-10 shadow-lg" transition={{ type: "spring", stiffness: 400, damping: 30 }} />}
             AI vs AI
           </button>
           <button
             onClick={() => setMode("human_vs_ai")}
             className={`relative px-8 py-3 rounded-full text-sm font-bold uppercase tracking-wider transition-colors z-10 ${mode === "human_vs_ai" ? "text-amber-950" : "text-charcoal-400 hover:text-charcoal-200"}`}
           >
-            {mode === "human_vs_ai" && <motion.div layoutId="mode-bg" className="absolute inset-0 bg-gradient-to-r from-[#D4AF37] to-[#E5C76B] rounded-full -z-10 shadow-lg" transition={{ type: "spring", stiffness: 400, damping: 30 }} />}
+            {mode === "human_vs_ai" && <motion.div layoutId="mode-bg" className="absolute inset-0 bg-gradient-to-r from-amber-500 to-amber-400 rounded-full -z-10 shadow-lg" transition={{ type: "spring", stiffness: 400, damping: 30 }} />}
             Human vs AI
           </button>
         </div>
@@ -223,7 +223,7 @@ export function ModelSelector({ models }: ModelSelectorProps) {
           whileTap={{ scale: 0.98 }}
           onClick={handleStart}
           disabled={isPending}
-          className="group relative w-full max-w-md h-20 rounded-2xl bg-gradient-to-r from-[#D4AF37] to-[#E5C76B] text-amber-950 font-bold overflow-hidden disabled:opacity-50 disabled:pointer-events-none shadow-[0_10px_30px_-10px_rgba(212,175,55,0.3)] transition-all"
+          className="group relative w-full max-w-md h-20 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-400 text-amber-950 font-bold overflow-hidden disabled:opacity-50 disabled:pointer-events-none shadow-[0_10px_30px_-10px_rgba(212,175,55,0.3)] transition-all"
         >
           <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="relative z-10 flex flex-col items-center justify-center h-full">

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const playfairDisplay = Playfair_Display({
   variable: "--font-playfair-display",
@@ -39,13 +40,16 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${playfairDisplay.variable} ${inter.variable} ${jetbrainsMono.variable} dark h-full antialiased`}
+      suppressHydrationWarning
+      className={`${playfairDisplay.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-charcoal-950 text-charcoal-100 selection:bg-amber-500/30">
-        <Navbar />
-        <main className="flex-1 flex flex-col">
-          {children}
-        </main>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <Navbar />
+          <main className="flex-1 flex flex-col">
+            {children}
+          </main>
+        </ThemeProvider>
       </body>
     </html>
   );

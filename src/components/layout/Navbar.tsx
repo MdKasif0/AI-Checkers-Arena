@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Crown, Sun, User, LogOut } from "lucide-react";
+import { Crown, User, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/utils/supabase/client";
 import { type User as SupabaseUser } from "@supabase/supabase-js";
 import { useState, useEffect, useMemo } from "react";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Navbar() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -58,9 +59,7 @@ export function Navbar() {
 
         {/* Right side controls */}
         <div className="flex items-center gap-4">
-          <button className="p-2 rounded-full text-charcoal-400 hover:text-amber-500 hover:bg-charcoal-800 transition-colors">
-            <Sun className="w-5 h-5" />
-          </button>
+          <ThemeToggle />
           
           {user ? (
             <div className="relative">

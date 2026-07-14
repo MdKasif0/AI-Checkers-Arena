@@ -41,27 +41,46 @@
   --color-card: var(--card);
 
   /* ── Custom charcoal scale ── */
-  /* ── Premium SaaS Dark Scale ── */
-  --color-charcoal-950: #070707;
-  --color-charcoal-900: #0D0D0D;
-  --color-charcoal-800: #111111;
-  --color-charcoal-700: #171717;
-  --color-charcoal-600: rgba(255, 255, 255, 0.08); /* Borders */
-  --color-charcoal-500: #333333;
-  --color-charcoal-400: #737373; /* Muted Text */
-  --color-charcoal-300: #A3A3A3; /* Secondary Text */
-  --color-charcoal-200: #d4d4d4;
-  --color-charcoal-100: #FAFAFA; /* Primary Text */
-  --color-charcoal-50:  #ffffff;
+  /* ── Custom charcoal scale (Dynamic) ── */
+  --color-charcoal-950: var(--charcoal-950);
+  --color-charcoal-900: var(--charcoal-900);
+  --color-charcoal-800: var(--charcoal-800);
+  --color-charcoal-700: var(--charcoal-700);
+  --color-charcoal-600: var(--charcoal-600);
+  --color-charcoal-500: var(--charcoal-500);
+  --color-charcoal-400: var(--charcoal-400);
+  --color-charcoal-300: var(--charcoal-300);
+  --color-charcoal-200: var(--charcoal-200);
+  --color-charcoal-100: var(--charcoal-100);
+  --color-charcoal-50:  var(--charcoal-50);
 
+  /* ── Custom Board & Piece variables ── */
+  --color-board-dark-sq: var(--board-dark-sq);
+  --color-board-dark-sq-to: var(--board-dark-sq-to);
+  --color-board-light-sq: var(--board-light-sq);
+  --color-board-light-sq-to: var(--board-light-sq-to);
+  --color-board-border: var(--board-border);
+  --color-board-border-inner: var(--board-border-inner);
+
+  --color-piece-white-outer: var(--piece-white-outer);
+  --color-piece-white-inner: var(--piece-white-inner);
+  --color-piece-white-border: var(--piece-white-border);
+  --color-piece-white-border-inner: var(--piece-white-border-inner);
+
+  --color-piece-black-outer: var(--piece-black-outer);
+  --color-piece-black-inner: var(--piece-black-inner);
+  --color-piece-black-border: var(--piece-black-border);
+  --color-piece-black-border-inner: var(--piece-black-border-inner);
+
+  /* ── Champagne Gold Scale ── */
   /* ── Champagne Gold Scale ── */
   --color-amber-950: #141103;
   --color-amber-900: #292106;
   --color-amber-800: rgba(212,175,55,0.18); /* Gold Glow */
   --color-amber-700: #8c6e17;
-  --color-amber-600: #B88917; /* Soft Gold */
-  --color-amber-500: #D4AF37; /* Primary Gold */
-  --color-amber-400: #E5C76B; /* Hover Gold */
+  --color-amber-600: var(--amber-600); /* Soft Gold */
+  --color-amber-500: var(--amber-500); /* Primary Gold */
+  --color-amber-400: var(--amber-400); /* Hover Gold */
   --color-amber-300: #eddb96;
   --color-amber-200: #F4E4A6; /* Light Champagne */
   --color-amber-100: #f8efce;
@@ -118,6 +137,42 @@
   --sidebar-accent-foreground: oklch(0.205 0.005 85);
   --sidebar-border: oklch(0.88 0.01 85);
   --sidebar-ring: oklch(0.65 0.16 70);
+
+  /* ── Light Mode Cream Palette (mapped to charcoal classes) ── */
+  --charcoal-950: #FDFBF7; /* Base Surface */
+  --charcoal-900: #F5F2EA; /* Cards/Elevated */
+  --charcoal-800: #E8E4D9; /* Borders / Hover */
+  --charcoal-700: #D4CFC1; /* Strong Border */
+  --charcoal-600: rgba(0, 0, 0, 0.08); /* Transparent borders */
+  --charcoal-500: #A39E93; /* Muted Elements */
+  --charcoal-400: #737067; /* Muted Text */
+  --charcoal-300: #52504A; /* Secondary Text */
+  --charcoal-200: #33312E; /* Dark Text */
+  --charcoal-100: #1A1918; /* Primary Text */
+  --charcoal-50:  #0A0A0A; /* Black */
+
+  /* Adjusted Amber for WCAG AA Contrast on Cream */
+  --amber-600: #8C6200;
+  --amber-500: #A67B10;
+  --amber-400: #B88917;
+
+  /* Board Constants */
+  --board-dark-sq: #533923;
+  --board-dark-sq-to: #48301d;
+  --board-light-sq: #c59762;
+  --board-light-sq-to: #ab7c4b;
+  --board-border: #2d1c0e;
+  --board-border-inner: #362211;
+
+  --piece-white-outer: #e5e5e5;
+  --piece-white-inner: #f5f5f5;
+  --piece-white-border: #ffffff;
+  --piece-white-border-inner: #d4d4d4;
+
+  --piece-black-outer: #1f1f1f;
+  --piece-black-inner: #141414;
+  --piece-black-border: #333333;
+  --piece-black-border-inner: #0a0a0a;
 }
 
 .dark {
@@ -152,6 +207,42 @@
   --sidebar-accent-foreground: oklch(0.93 0.01 85);
   --sidebar-border: oklch(1 0 0 / 8%);
   --sidebar-ring: oklch(0.75 0.15 70);
+
+  /* ── Dark Mode Charcoal Palette ── */
+  --charcoal-950: #070707;
+  --charcoal-900: #0D0D0D;
+  --charcoal-800: #111111;
+  --charcoal-700: #171717;
+  --charcoal-600: rgba(255, 255, 255, 0.08); /* Borders */
+  --charcoal-500: #333333;
+  --charcoal-400: #737373; /* Muted Text */
+  --charcoal-300: #A3A3A3; /* Secondary Text */
+  --charcoal-200: #d4d4d4;
+  --charcoal-100: #FAFAFA; /* Primary Text */
+  --charcoal-50:  #ffffff;
+
+  /* Standard Amber for Dark Mode */
+  --amber-600: #B88917;
+  --amber-500: #D4AF37;
+  --amber-400: #E5C76B;
+
+  /* Board Constants */
+  --board-dark-sq: #533923;
+  --board-dark-sq-to: #48301d;
+  --board-light-sq: #c59762;
+  --board-light-sq-to: #ab7c4b;
+  --board-border: #2d1c0e;
+  --board-border-inner: #362211;
+
+  --piece-white-outer: #e5e5e5;
+  --piece-white-inner: #f5f5f5;
+  --piece-white-border: #ffffff;
+  --piece-white-border-inner: #d4d4d4;
+
+  --piece-black-outer: #1f1f1f;
+  --piece-black-inner: #141414;
+  --piece-black-border: #333333;
+  --piece-black-border-inner: #0a0a0a;
 }
 
 @layer base {

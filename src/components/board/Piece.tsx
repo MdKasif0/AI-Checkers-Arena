@@ -16,11 +16,11 @@ export function Piece({ piece }: PieceProps) {
 
   const isWhite = piece.player === "white";
   
-  const outerBg = isWhite ? "bg-[#e5e5e5]" : "bg-[#1f1f1f]";
-  const outerBorder = isWhite ? "border-[#ffffff]" : "border-[#333333]";
-  const innerBg = isWhite ? "bg-[#f5f5f5]" : "bg-[#141414]";
-  const innerBorder = isWhite ? "border-[#d4d4d4]" : "border-[#0a0a0a]";
-  const centerBg = isWhite ? "bg-[#e5e5e5]" : "bg-[#1f1f1f]";
+  const outerBg = isWhite ? "bg-piece-white-outer" : "bg-piece-black-outer";
+  const outerBorder = isWhite ? "border-piece-white-border" : "border-piece-black-border";
+  const innerBg = isWhite ? "bg-piece-white-inner" : "bg-piece-black-inner";
+  const innerBorder = isWhite ? "border-piece-white-border-inner" : "border-piece-black-border-inner";
+  const centerBg = isWhite ? "bg-piece-white-outer" : "bg-piece-black-outer";
   
   return (
     <motion.div

@@ -84,12 +84,10 @@ export function Board({ board, lastMove, legalMoves, isHumanTurn, onHumanMove }:
          highlightClass += " hover:after:absolute hover:after:inset-[2px] hover:after:border-2 hover:after:border-amber-500/30 hover:after:pointer-events-none hover:after:z-20 cursor-pointer";
       }
       
-      // Wood gradient/texture backgrounds
-      // Playable dark square: #533923 -> #48301d
-      // Light square: #c59762 -> #ab7c4b
-      const bgStyle = isPlayable 
-        ? "bg-gradient-to-br from-[#533923] to-[#48301d]" 
-        : "bg-gradient-to-br from-[#c59762] to-[#ab7c4b]";
+      // Premium alternating square gradients
+      const bgClass = isPlayable 
+        ? "bg-gradient-to-br from-board-dark-sq to-board-dark-sq-to" 
+        : "bg-gradient-to-br from-board-light-sq to-board-light-sq-to";
 
       cells.push(
         <div
@@ -97,7 +95,7 @@ export function Board({ board, lastMove, legalMoves, isHumanTurn, onHumanMove }:
           onClick={() => isPlayable && sq ? handleCellClick(sq) : undefined}
           className={`
             relative w-full h-full p-[2px] overflow-hidden
-            ${bgStyle}
+            ${bgClass}
             ${highlightClass}
           `}
         >
@@ -105,7 +103,7 @@ export function Board({ board, lastMove, legalMoves, isHumanTurn, onHumanMove }:
           <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
 
           {isPlayable && sq && (
-            <span className="absolute top-1 left-1 text-[0.55rem] font-mono text-[#25180f] font-bold select-none leading-none z-10 opacity-70">
+            <span className="absolute top-1 left-1 text-[0.55rem] font-mono text-charcoal-950 font-bold select-none leading-none z-10 opacity-70">
               {sq}
             </span>
           )}
@@ -115,13 +113,13 @@ export function Board({ board, lastMove, legalMoves, isHumanTurn, onHumanMove }:
   }
 
   return (
-    <div className="relative w-full max-w-[600px] mx-auto aspect-square rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-[#2d1c0e] bg-[#2d1c0e] p-[2px]">
+    <div className="relative w-full max-w-[600px] mx-auto aspect-square rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-board-border bg-board-border p-[2px]">
       
       {/* Outer Golden/Wood Bevel */}
       <div className="absolute -inset-1 rounded-xl border border-amber-500/20 shadow-[0_0_20px_rgba(212,175,55,0.1)] pointer-events-none" />
 
-      {/* Main Board Container */}
-      <div className="relative w-full h-full border-[10px] border-[#362211] rounded-lg overflow-hidden shadow-inner">
+      {/* Thick Inner Border */}
+      <div className="relative w-full h-full border-[10px] border-board-border-inner rounded-lg overflow-hidden shadow-inner">
         {/* Inner golden glow along the edge of the playable area */}
         <div className="absolute inset-0 shadow-[inset_0_0_40px_rgba(212,175,55,0.15)] pointer-events-none z-30 mix-blend-screen" />
         <div className="absolute inset-0 border-[2px] border-amber-900/40 pointer-events-none z-30" />

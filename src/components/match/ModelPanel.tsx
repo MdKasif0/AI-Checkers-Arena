@@ -52,11 +52,12 @@ export function ModelPanel({ player, modelName, moves, currentState, isThinking,
 
       {/* Header Info */}
       <div className="flex items-center gap-4 relative z-10">
-        <div className={`w-[60px] h-[60px] flex-shrink-0 rounded-full flex items-center justify-center font-display font-bold text-2xl shadow-inner border-2 ${
-          isWhite 
-            ? "bg-gradient-to-b from-[#E5C76B] to-[#B88917] border-[#D4AF37] text-[#1a1505]" 
-            : "bg-gradient-to-b from-[#2d2d2d] to-[#111111] border-[#333333] text-charcoal-300"
-        }`}>
+        <div className={`flex items-center gap-3 px-5 py-3 rounded-t-xl border-b ${
+            isThinking 
+            ? "bg-gradient-to-b from-amber-400 to-amber-600 border-amber-500 text-amber-950" 
+            : "bg-gradient-to-b from-charcoal-800 to-charcoal-900 border-charcoal-700 text-charcoal-300"
+          }`}
+        >
           {isWhite ? "W" : "B"}
         </div>
         <div className="min-w-0 flex-1">
