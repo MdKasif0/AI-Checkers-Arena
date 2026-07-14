@@ -18,7 +18,7 @@ export interface CreateMatchParams {
 /**
  * Creates a new match in the database.
  */
-export async function createMatch({ whiteModel, blackModel }: CreateMatchParams) {
+export async function createMatch({ whiteModel, blackModel, mode }: CreateMatchParams) {
   const { data, error } = await supabase
     .from("matches")
     .insert({
@@ -205,6 +205,7 @@ export async function updateModelStats(
       avg_move_latency_ms: (currentStats.avg_move_latency_ms * matchesPlayed + matchAvgLatency) / (matchesPlayed + 1),
       avg_tokens: (currentStats.avg_tokens * matchesPlayed + matchAvgTokens) / (matchesPlayed + 1),
       illegal_move_rate: (currentStats.illegal_move_rate * matchesPlayed + matchIllegalRate) / (matchesPlayed + 1),
+      rating: currentStats.rating || 1200,
     };
   };
 

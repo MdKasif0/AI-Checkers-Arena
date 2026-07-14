@@ -7,6 +7,7 @@ export interface MatchDB {
   status: "in_progress" | "completed";
   winner: Player | null;
   result_reason: string | null;
+  mode: "ai_vs_ai" | "human_vs_ai";
 }
 
 export interface MoveDB {
