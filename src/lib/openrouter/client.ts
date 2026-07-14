@@ -61,36 +61,37 @@ export async function getOpenRouterMove(
     attempts++;
     const startTime = Date.now();
 
-    const response = await fetch(OPENROUTER_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-        "HTTP-Referer": "https://aicheckersarena.vercel.app",
-        "X-Title": "AI Checkers Arena",
-      },
-      body: JSON.stringify({
-        model: modelId,
-        messages: [{ role: "system", content: prompt }],
-        temperature: 0.2, // Low variance
-        max_tokens: 150, // Short responses only
-        seed: 42, // Enforce determinism
-        response_format: { type: "json_object" }, // Ask OpenRouter for JSON mode if supported
-      }),
-    });
-
-    const latencyMs = Date.now() - startTime;
-
-    if (!response.ok) {
-      const err = await response.text();
-      throw new Error(`OpenRouter API Error: ${response.status} ${err}`);
-    }
-
-    const data = await response.json();
-    const tokensUsed = data.usage?.total_tokens || 0;
-    const content = data.choices?.[0]?.message?.content || "";
-
     try {
+      const response = await fetch(OPENROUTER_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+          "HTTP-Referer": "https://aicheckersarena.vercel.app",
+          "X-Title": "AI Checkers Arena",
+        },
+        body: JSON.stringify({
+          model: modelId,
+          messages: [{ role: "system", content: prompt }],
+          temperature: 0.2, // Low variance
+          max_tokens: 150, // Short responses only
+          seed: 42, // Enforce determinism
+          response_format: { type: "json_object" }, // Ask OpenRouter for JSON mode if supported
+        }),
+        signal: AbortSignal.timeout(15000), // 15 second timeout
+      });
+
+      const latencyMs = Date.now() - startTime;
+
+      if (!response.ok) {
+        const err = await response.text();
+        throw new Error(`OpenRouter API Error: ${response.status} ${err}`);
+      }
+
+      const data = await response.json();
+      const tokensUsed = data.usage?.total_tokens || 0;
+      const content = data.choices?.[0]?.message?.content || "";
+
       const parsed = extractJson(content);
       const chosenMove = notationToMove(parsed.move, legalMoves);
 
@@ -118,8 +119,8 @@ export async function getOpenRouterMove(
           reasoning: `Model failed to output a valid move after ${MAX_ATTEMPTS} attempts. Random legal move chosen. Error: ${
             (e as Error).message
           }`,
-          latencyMs,
-          tokensUsed,
+          latencyMs: Date.now() - startTime,
+          tokensUsed: 0,
           wasIllegalAttempt: true,
         };
       }

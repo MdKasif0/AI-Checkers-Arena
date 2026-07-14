@@ -18,10 +18,10 @@ import { getOpenRouterMove } from "@/lib/openrouter";
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const matchId = params.id;
+    const { id: matchId } = await params;
     if (!matchId) {
       return NextResponse.json({ error: "Missing match ID" }, { status: 400 });
     }
