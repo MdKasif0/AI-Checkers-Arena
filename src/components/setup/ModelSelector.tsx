@@ -3,8 +3,10 @@
 import { useState, useEffect, useTransition, useMemo } from "react";
 import { ORModel, DEFAULT_SHORTLIST } from "@/lib/openrouter/models";
 import { startMatch } from "@/app/actions";
-import { Search, Loader2, AlertCircle, ArrowRight, Check, Sparkles, Brain, Cpu, Zap, Activity } from "lucide-react";
+import { Search, Loader2, AlertCircle, ArrowRight, Check, Sparkles, Brain, Cpu, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { createClient } from "@/utils/supabase/client";
+import { type User as SupabaseUser } from "@supabase/supabase-js";
 
 interface ModelSelectorProps {
   models: ORModel[];
@@ -34,6 +36,17 @@ export function ModelSelector({ models }: ModelSelectorProps) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const supabase = useMemo(() => createClient(), []);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, [supabase]);
+
   useEffect(() => {
     try {
       const stored = localStorage.getItem("recentModels");
@@ -55,6 +68,16 @@ export function ModelSelector({ models }: ModelSelectorProps) {
     e.preventDefault();
     setError(null);
     
+    if (mode === "human_vs_ai" && !user) {
+      await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=/`
+        }
+      });
+      return;
+    }
+
     const actualWhite = mode === "human_vs_ai" && humanColor === "white" ? "human" : whiteModel;
     const actualBlack = mode === "human_vs_ai" && humanColor === "black" ? "human" : blackModel;
 
@@ -205,10 +228,12 @@ export function ModelSelector({ models }: ModelSelectorProps) {
           <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="relative z-10 flex flex-col items-center justify-center h-full">
             <div className="flex items-center gap-3 text-xl tracking-wide uppercase">
-              {isPending ? <Loader2 className="animate-spin w-6 h-6" /> : "Spawn Arena"}
+              {isPending ? <Loader2 className="animate-spin w-6 h-6" /> : (mode === "human_vs_ai" && !user ? "Continue with Google to Play" : "Spawn Arena")}
               {!isPending && <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />}
             </div>
-            <span className="text-amber-950/70 text-xs font-semibold mt-1">Start autonomous AI battle</span>
+            <span className="text-amber-950/70 text-xs font-semibold mt-1">
+              {mode === "human_vs_ai" && !user ? "Sign in required for human matches" : "Start autonomous AI battle"}
+            </span>
           </div>
         </motion.button>
 

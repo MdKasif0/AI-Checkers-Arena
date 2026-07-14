@@ -12,7 +12,7 @@ export default async function HistoryPage() {
       <h1 className="text-4xl font-display font-bold text-amber-500 mb-8">Match History</h1>
       
       <div className="flex flex-col gap-4">
-        {matches.map((match: MatchDB & { created_at: string; finished_at?: string }) => {
+        {matches.map((match: any) => {
           const durationStr = match.finished_at 
             ? `${Math.round((new Date(match.finished_at).getTime() - new Date(match.created_at).getTime()) / 1000)}s`
             : "In Progress";
@@ -25,7 +25,9 @@ export default async function HistoryPage() {
             >
               <div>
                 <h3 className="text-lg font-semibold text-charcoal-100 group-hover:text-amber-500 transition-colors">
-                  {match.white_model} <span className="text-charcoal-500 font-normal">vs</span> {match.black_model}
+                  {match.white_model === 'human' ? match.profiles?.display_name || 'Human Player' : match.white_model} 
+                  <span className="text-charcoal-500 font-normal mx-2">vs</span> 
+                  {match.black_model === 'human' ? match.profiles?.display_name || 'Human Player' : match.black_model}
                 </h3>
                 <p className="text-sm font-mono text-charcoal-400 mt-1">
                   {new Date(match.created_at).toLocaleString()} • ID: {match.id.split("-")[0]}

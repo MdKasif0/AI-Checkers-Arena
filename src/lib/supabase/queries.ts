@@ -1,4 +1,4 @@
-import { supabase } from "./client";
+import { createClient } from "@/utils/supabase/server";
 
 export type MatchStatus = "in_progress" | "completed";
 export type PlayerColor = "white" | "black";
@@ -19,6 +19,9 @@ export interface CreateMatchParams {
  * Creates a new match in the database.
  */
 export async function createMatch({ whiteModel, blackModel, mode }: CreateMatchParams) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   const { data, error } = await supabase
     .from("matches")
     .insert({
@@ -26,6 +29,7 @@ export async function createMatch({ whiteModel, blackModel, mode }: CreateMatchP
       black_model: blackModel,
       status: "in_progress",
       mode: mode || "ai_vs_ai",
+      human_user_id: mode === "human_vs_ai" && user ? user.id : null,
     })
     .select()
     .single();
@@ -49,6 +53,7 @@ export interface AppendMoveParams {
  * Appends a move to an ongoing match.
  */
 export async function appendMove(params: AppendMoveParams) {
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("moves")
     .insert({
@@ -76,6 +81,7 @@ export async function finalizeMatch(
   winner: PlayerColor | null,
   reason: MatchResultReason
 ) {
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("matches")
     .update({
@@ -110,6 +116,8 @@ export async function updateModelStats(
   winner: PlayerColor | null,
   matchId: string
 ) {
+  const supabase = await createClient();
+
   // 1. Fetch match to check mode
   const { data: match } = await supabase
     .from("matches")
@@ -234,6 +242,7 @@ export async function updateModelStats(
  * Fetches the complete match and its move history.
  */
 export async function getMatchState(matchId: string) {
+  const supabase = await createClient();
   const { data: match, error: matchError } = await supabase
     .from("matches")
     .select("*")
@@ -257,9 +266,10 @@ export async function getMatchState(matchId: string) {
  * Fetches recent matches for the history page.
  */
 export async function getMatchHistory() {
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("matches")
-    .select("*")
+    .select("*, profiles(display_name, avatar_url)")
     .order("created_at", { ascending: false })
     .limit(100);
     
@@ -271,6 +281,7 @@ export async function getMatchHistory() {
  * Fetches the leaderboard of model stats.
  */
 export async function getLeaderboard() {
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("model_stats")
     .select("*")
