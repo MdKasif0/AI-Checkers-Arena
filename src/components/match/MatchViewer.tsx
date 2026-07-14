@@ -59,11 +59,13 @@ export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
         const errData = await res.json().catch(() => ({}));
         throw new Error(`Failed to process turn: ${res.status} ${errData.error || ""}`);
       }
+      // Reset the ref BEFORE refresh so the next render cycle can trigger the next turn
+      processingRef.current = false;
+      setIsProcessing(false);
       router.refresh();
     } catch (e) {
       console.error(e);
       processingRef.current = false;
-    } finally {
       setIsProcessing(false);
     }
   };
@@ -76,7 +78,7 @@ export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
       handleNextTurn();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [match.status, isHumanTurn, isLive]);
+  }, [match.status, isHumanTurn, isLive, moves.length]);
 
   const currentLegalMoves = useMemo(() => {
     if (!isLive) return [];
