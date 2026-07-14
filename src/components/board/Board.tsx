@@ -65,7 +65,6 @@ export function Board({ board, lastMove, legalMoves, isHumanTurn, onHumanMove }:
       const isLastMoveSq = sq ? lastMoveSquares.has(sq) : false;
       const isSelected = sq === selectedSq;
       
-      // Determine if this cell is a valid destination for the selected piece
       const validDestinations = selectedSq 
         ? legalMoves.filter(m => m.from === selectedSq).map(m => m.path[m.path.length - 1])
         : [];
@@ -73,31 +72,40 @@ export function Board({ board, lastMove, legalMoves, isHumanTurn, onHumanMove }:
       
       let highlightClass = "";
       if (isLastMoveSq && !isSelected) {
-        highlightClass = "after:absolute after:inset-0 after:bg-[#8bc34a]/30 after:border-4 after:border-[#8bc34a] after:pointer-events-none after:z-20";
+        highlightClass = "after:absolute after:inset-[2px] after:border-2 after:border-amber-500/70 after:pointer-events-none after:z-20 after:shadow-[0_0_10px_rgba(212,175,55,0.5)]";
       } else if (isSelected) {
-        highlightClass = "after:absolute after:inset-0 after:bg-amber-500/40 after:border-4 after:border-amber-400 after:pointer-events-none after:z-20";
+        highlightClass = "after:absolute after:inset-[2px] after:border-[3px] after:border-amber-400 after:pointer-events-none after:z-20 after:shadow-[0_0_15px_rgba(212,175,55,0.8)]";
       } else if (isDestination) {
-        highlightClass = "after:absolute after:inset-[25%] after:rounded-full after:bg-amber-500/50 after:pointer-events-none after:z-20 cursor-pointer";
+        highlightClass = "after:absolute after:inset-[35%] after:rounded-full after:bg-amber-500/60 after:pointer-events-none after:z-20 cursor-pointer shadow-[0_0_10px_rgba(212,175,55,0.5)]";
       }
 
       const canSelect = isPlayable && sq && isHumanTurn && legalMoves.some(m => m.from === sq);
       if (canSelect && !isSelected && !isDestination) {
-         // Optionally add hover effect for selectable pieces
-         highlightClass += " hover:after:absolute hover:after:inset-0 hover:after:bg-amber-500/10 hover:after:pointer-events-none hover:after:z-20 cursor-pointer";
+         highlightClass += " hover:after:absolute hover:after:inset-[2px] hover:after:border-2 hover:after:border-amber-500/30 hover:after:pointer-events-none hover:after:z-20 cursor-pointer";
       }
       
+      // Wood gradient/texture backgrounds
+      // Playable dark square: #533923 -> #48301d
+      // Light square: #c59762 -> #ab7c4b
+      const bgStyle = isPlayable 
+        ? "bg-gradient-to-br from-[#533923] to-[#48301d]" 
+        : "bg-gradient-to-br from-[#c59762] to-[#ab7c4b]";
+
       cells.push(
         <div
           key={`${row}-${col}`}
           onClick={() => isPlayable && sq ? handleCellClick(sq) : undefined}
           className={`
-            relative w-full h-full flex items-start justify-end p-1
-            ${isPlayable ? "bg-[#b05f3c]" : "bg-[#ecd3a9]"}
+            relative w-full h-full p-[2px] overflow-hidden
+            ${bgStyle}
             ${highlightClass}
           `}
         >
+          {/* Subtle noise texture overlay */}
+          <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
+
           {isPlayable && sq && (
-            <span className="text-[0.65rem] text-black/30 font-mono leading-none select-none">
+            <span className="absolute top-1 left-1 text-[0.55rem] font-mono text-[#25180f] font-bold select-none leading-none z-10 opacity-70">
               {sq}
             </span>
           )}
@@ -107,20 +115,28 @@ export function Board({ board, lastMove, legalMoves, isHumanTurn, onHumanMove }:
   }
 
   return (
-    <div className="relative w-full max-w-2xl mx-auto aspect-square border-[16px] border-[#915e37] rounded-sm bg-[#5c351c] shadow-[0_10px_30px_rgba(0,0,0,0.8)] overflow-hidden">
-      {/* Inner shadow to give the wood frame depth */}
-      <div className="absolute inset-0 shadow-[inset_0_0_20px_rgba(0,0,0,0.8)] pointer-events-none z-30" />
+    <div className="relative w-full max-w-[600px] mx-auto aspect-square rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-[#2d1c0e] bg-[#2d1c0e] p-[2px]">
       
-      <div className="absolute inset-0 grid grid-cols-10 grid-rows-10">
-        {cells}
-      </div>
-      
-      <div className="absolute inset-0 pointer-events-none">
-        <AnimatePresence>
-          {pieces.map((p) => (
-            <Piece key={p.id} piece={p} />
-          ))}
-        </AnimatePresence>
+      {/* Outer Golden/Wood Bevel */}
+      <div className="absolute -inset-1 rounded-xl border border-amber-500/20 shadow-[0_0_20px_rgba(212,175,55,0.1)] pointer-events-none" />
+
+      {/* Main Board Container */}
+      <div className="relative w-full h-full border-[10px] border-[#362211] rounded-lg overflow-hidden shadow-inner">
+        {/* Inner golden glow along the edge of the playable area */}
+        <div className="absolute inset-0 shadow-[inset_0_0_40px_rgba(212,175,55,0.15)] pointer-events-none z-30 mix-blend-screen" />
+        <div className="absolute inset-0 border-[2px] border-amber-900/40 pointer-events-none z-30" />
+        
+        <div className="absolute inset-0 grid grid-cols-10 grid-rows-10">
+          {cells}
+        </div>
+        
+        <div className="absolute inset-0 pointer-events-none">
+          <AnimatePresence>
+            {pieces.map((p) => (
+              <Piece key={p.id} piece={p} />
+            ))}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );
