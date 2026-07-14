@@ -1,98 +1,130 @@
-/**
- * OpenRouter API Client
- *
- * Server-side only — calls OpenRouter's chat completions endpoint.
- * Used by the /api/openrouter route handler.
- */
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export interface ModelCallOptions {
-  /** OpenRouter model identifier, e.g. "openai/gpt-4o" */
-  model: string;
-  /** The prompt / messages to send */
-  messages: ChatMessage[];
-  /** Maximum tokens in the response */
-  maxTokens?: number;
-  /** Sampling temperature */
-  temperature?: number;
-}
-
-export interface ChatMessage {
-  role: "system" | "user" | "assistant";
-  content: string;
-}
-
-export interface ModelCallResult {
-  /** The model's text response */
-  content: string;
-  /** Model identifier that actually served the request */
-  model: string;
-  /** Token usage */
-  usage: {
-    promptTokens: number;
-    completionTokens: number;
-    totalTokens: number;
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Client
-// ---------------------------------------------------------------------------
+import { GameState, Move, notationToMove } from "../engine";
+import { generatePrompt } from "./prompt";
+import { AiMoveResult, OpenRouterResponse } from "./types";
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 /**
- * Call an AI model via OpenRouter.
- *
- * Requires OPENROUTER_API_KEY environment variable.
- * This is a server-side function — never import in client components.
+ * Robustly extracts the first JSON object from a potentially messy LLM output string.
  */
-export async function callModel(
-  options: ModelCallOptions
-): Promise<ModelCallResult> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    throw new Error(
-      "OPENROUTER_API_KEY is not set. Add it to your .env.local file."
-    );
+export function extractJson(text: string): OpenRouterResponse {
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) {
+    throw new Error("No JSON object found in the response.");
   }
 
-  const response = await fetch(OPENROUTER_API_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-      "X-Title": "AI Checkers Arena",
-    },
-    body: JSON.stringify({
-      model: options.model,
-      messages: options.messages,
-      max_tokens: options.maxTokens ?? 1024,
-      temperature: options.temperature ?? 0.7,
-    }),
-  });
+  try {
+    const parsed = JSON.parse(match[0]);
+    if (typeof parsed.move !== "string" || typeof parsed.reason !== "string") {
+      throw new Error(
+        "JSON does not match the required schema {move: string, reason: string}."
+      );
+    }
+    return parsed as OpenRouterResponse;
+  } catch (e) {
+    throw new Error(`Failed to parse JSON: ${(e as Error).message}`);
+  }
+}
 
-  if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(
-      `OpenRouter API error (${response.status}): ${errorBody}`
-    );
+/**
+ * Fetches a move from an OpenRouter model, strictly enforcing the JSON schema and legal move list.
+ * Retries up to 3 times if the model hallucinates an illegal move or invalid JSON.
+ */
+export async function getOpenRouterMove(
+  modelId: string,
+  state: GameState,
+  legalMoves: Move[],
+  apiKey: string
+): Promise<AiMoveResult> {
+  if (legalMoves.length === 0) {
+    throw new Error("Cannot request a move: no legal moves available.");
   }
 
-  const data = await response.json();
-  const choice = data.choices?.[0];
+  // Only 1 legal move? Skip the LLM call entirely to save tokens/latency!
+  if (legalMoves.length === 1) {
+    return {
+      move: legalMoves[0],
+      reasoning: "Only one legal move available (forced move).",
+      latencyMs: 0,
+      tokensUsed: 0,
+      wasIllegalAttempt: false,
+    };
+  }
 
-  return {
-    content: choice?.message?.content ?? "",
-    model: data.model ?? options.model,
-    usage: {
-      promptTokens: data.usage?.prompt_tokens ?? 0,
-      completionTokens: data.usage?.completion_tokens ?? 0,
-      totalTokens: data.usage?.total_tokens ?? 0,
-    },
-  };
+  const prompt = generatePrompt(state, legalMoves);
+
+  let attempts = 0;
+  const MAX_ATTEMPTS = 3;
+  let wasIllegalAttempt = false;
+
+  while (attempts < MAX_ATTEMPTS) {
+    attempts++;
+    const startTime = Date.now();
+
+    const response = await fetch(OPENROUTER_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+        "HTTP-Referer": "https://aicheckersarena.vercel.app",
+        "X-Title": "AI Checkers Arena",
+      },
+      body: JSON.stringify({
+        model: modelId,
+        messages: [{ role: "system", content: prompt }],
+        temperature: 0.2, // Low variance
+        max_tokens: 150, // Short responses only
+        seed: 42, // Enforce determinism
+        response_format: { type: "json_object" }, // Ask OpenRouter for JSON mode if supported
+      }),
+    });
+
+    const latencyMs = Date.now() - startTime;
+
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(`OpenRouter API Error: ${response.status} ${err}`);
+    }
+
+    const data = await response.json();
+    const tokensUsed = data.usage?.total_tokens || 0;
+    const content = data.choices?.[0]?.message?.content || "";
+
+    try {
+      const parsed = extractJson(content);
+      const chosenMove = notationToMove(parsed.move, legalMoves);
+
+      if (!chosenMove) {
+        throw new Error(
+          `Model returned an illegal or unlisted move: ${parsed.move}`
+        );
+      }
+
+      return {
+        move: chosenMove,
+        reasoning: parsed.reason,
+        latencyMs,
+        tokensUsed,
+        wasIllegalAttempt,
+      };
+    } catch (e) {
+      wasIllegalAttempt = true;
+      if (attempts >= MAX_ATTEMPTS) {
+        // Fallback to random legal move to prevent the match from crashing forever
+        const fallbackMove =
+          legalMoves[Math.floor(Math.random() * legalMoves.length)];
+        return {
+          move: fallbackMove,
+          reasoning: `Model failed to output a valid move after ${MAX_ATTEMPTS} attempts. Random legal move chosen. Error: ${
+            (e as Error).message
+          }`,
+          latencyMs,
+          tokensUsed,
+          wasIllegalAttempt: true,
+        };
+      }
+    }
+  }
+
+  throw new Error("Unreachable");
 }
