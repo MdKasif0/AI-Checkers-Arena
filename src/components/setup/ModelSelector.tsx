@@ -24,11 +24,11 @@ function getPremiumStats(model: ORModel) {
 export function ModelSelector({ models }: ModelSelectorProps) {
   const [search, setSearch] = useState("");
   const [providerFilter, setProviderFilter] = useState<string | null>(null);
-  
+
   const [whiteModel, setWhiteModel] = useState<string>(DEFAULT_SHORTLIST[0]);
   const [blackModel, setBlackModel] = useState<string>(DEFAULT_SHORTLIST[1]);
   const [activeSelection, setActiveSelection] = useState<"white" | "black">("white");
-  
+
   const [mode, setMode] = useState<"ai_vs_ai" | "human_vs_ai">("ai_vs_ai");
   const [humanColor, setHumanColor] = useState<"white" | "black">("white");
 
@@ -51,7 +51,7 @@ export function ModelSelector({ models }: ModelSelectorProps) {
     try {
       const stored = localStorage.getItem("recentModels");
       if (stored) setRecentModels(JSON.parse(stored));
-    } catch {}
+    } catch { }
   }, []);
 
   const handleSelect = (id: string) => {
@@ -67,7 +67,7 @@ export function ModelSelector({ models }: ModelSelectorProps) {
   const handleStart = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    
+
     if (mode === "human_vs_ai" && !user) {
       await supabase.auth.signInWithOAuth({
         provider: "google",
@@ -92,7 +92,7 @@ export function ModelSelector({ models }: ModelSelectorProps) {
       formData.append("mode", mode);
       formData.append("whiteModel", actualWhite);
       formData.append("blackModel", actualBlack);
-      
+
       const res = await startMatch(formData);
       if (res?.error) {
         setError(res.error);
@@ -101,16 +101,16 @@ export function ModelSelector({ models }: ModelSelectorProps) {
   };
 
   const providers = Array.from(new Set(models.map(m => m.provider))).sort();
-  
+
   const showFullCatalog = search.length > 0 || providerFilter !== null;
   const displayModels = useMemo(() => {
-    return showFullCatalog 
+    return showFullCatalog
       ? models.filter(m => {
-          if (providerFilter === "FREE" && !m.is_free) return false;
-          if (providerFilter && providerFilter !== "FREE" && m.provider !== providerFilter) return false;
-          if (search && !m.name.toLowerCase().includes(search.toLowerCase()) && !m.id.toLowerCase().includes(search.toLowerCase())) return false;
-          return true;
-        })
+        if (providerFilter === "FREE" && !m.is_free) return false;
+        if (providerFilter && providerFilter !== "FREE" && m.provider !== providerFilter) return false;
+        if (search && !m.name.toLowerCase().includes(search.toLowerCase()) && !m.id.toLowerCase().includes(search.toLowerCase())) return false;
+        return true;
+      })
       : models.filter(m => DEFAULT_SHORTLIST.includes(m.id));
   }, [models, showFullCatalog, providerFilter, search]);
 
@@ -123,30 +123,28 @@ export function ModelSelector({ models }: ModelSelectorProps) {
     const isTarget = mode === "human_vs_ai" ? (humanColor !== player) : (activeSelection === player);
 
     return (
-      <motion.div 
+      <motion.div
         whileHover={{ y: -4, scale: 1.01 }}
         onClick={() => {
           if (mode === "human_vs_ai") setHumanColor(player === "white" ? "white" : "black");
           else setActiveSelection(player);
         }}
-        className={`relative flex-1 p-6 rounded-2xl cursor-pointer border backdrop-blur-xl transition-all duration-500 overflow-hidden ${
-          isTarget 
-            ? "border-amber-500/50 bg-charcoal-800/80 shadow-[0_8px_32px_-8px_rgba(212,175,55,0.2)]" 
+        className={`relative flex-1 p-6 rounded-2xl cursor-pointer border backdrop-blur-xl transition-all duration-500 overflow-hidden ${isTarget
+            ? "border-amber-500/50 bg-charcoal-800/80 shadow-[0_8px_32px_-8px_rgba(212,175,55,0.2)]"
             : "border-charcoal-700/50 bg-charcoal-900/40 hover:border-charcoal-500/50"
-        }`}
+          }`}
       >
         {isTarget && (
-          <motion.div 
+          <motion.div
             layoutId="active-glow"
             className="absolute -inset-1 bg-gradient-to-r from-amber-500/10 to-transparent blur-xl pointer-events-none"
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           />
         )}
-        
+
         <div className="relative z-10 flex items-center gap-6">
-          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl font-display font-bold shadow-inner border ${
-            isTarget ? "bg-amber-500/10 text-amber-500 border-amber-500/30" : "bg-charcoal-800 text-charcoal-300 border-charcoal-700"
-          }`}>
+          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl font-display font-bold shadow-inner border ${isTarget ? "bg-amber-500/10 text-amber-500 border-amber-500/30" : "bg-charcoal-800 text-charcoal-300 border-charcoal-700"
+            }`}>
             {isHuman ? <UserIcon /> : stats?.initial}
           </div>
           <div className="flex-1 min-w-0">
@@ -158,8 +156,8 @@ export function ModelSelector({ models }: ModelSelectorProps) {
             </div>
             {!isHuman && (
               <div className="flex flex-wrap items-center gap-3">
-                <span className="text-xs font-mono text-charcoal-500 flex items-center gap-1.5"><Cpu className="w-3.5 h-3.5"/> {(model!.context_length / 1000).toFixed(0)}k</span>
-                <span className="text-xs font-mono text-charcoal-500 flex items-center gap-1.5"><Zap className="w-3.5 h-3.5"/> {stats?.speed}</span>
+                <span className="text-xs font-mono text-charcoal-500 flex items-center gap-1.5"><Cpu className="w-3.5 h-3.5" /> {(model!.context_length / 1000).toFixed(0)}k</span>
+                <span className="text-xs font-mono text-charcoal-500 flex items-center gap-1.5"><Zap className="w-3.5 h-3.5" /> {stats?.speed}</span>
                 {model?.is_free && <span className="text-[0.65rem] uppercase tracking-wider font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded">Free</span>}
               </div>
             )}
@@ -171,7 +169,7 @@ export function ModelSelector({ models }: ModelSelectorProps) {
 
   return (
     <div className="w-full max-w-[1200px] mx-auto flex flex-col gap-16 pb-32">
-      
+
       {/* Mode Toggle (Segmented Control) */}
       <div className="flex justify-center">
         <div className="flex bg-charcoal-900/80 backdrop-blur-md rounded-full p-1.5 border border-white/5 shadow-2xl relative">
@@ -195,16 +193,16 @@ export function ModelSelector({ models }: ModelSelectorProps) {
       {/* VS Section */}
       <div className="flex flex-col lg:flex-row items-center gap-6 relative">
         {renderActiveCard("white", whiteModel)}
-        
+
         {/* Animated VS Circle */}
         <div className="relative shrink-0 w-20 h-20 flex items-center justify-center z-20">
-          <motion.div 
-            animate={{ rotate: 360 }} 
+          <motion.div
+            animate={{ rotate: 360 }}
             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
             className="absolute inset-0 rounded-full border border-amber-500/30 border-dashed"
           />
-          <motion.div 
-            animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5] }} 
+          <motion.div
+            animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             className="absolute inset-2 rounded-full bg-amber-500/10 blur-md"
           />
@@ -218,7 +216,7 @@ export function ModelSelector({ models }: ModelSelectorProps) {
 
       {/* CTA Button */}
       <div className="flex flex-col items-center">
-        <motion.button 
+        <motion.button
           whileHover={{ y: -2, scale: 1.02, boxShadow: "0 20px 40px -10px rgba(212,175,55,0.4)" }}
           whileTap={{ scale: 0.98 }}
           onClick={handleStart}
@@ -263,8 +261,8 @@ export function ModelSelector({ models }: ModelSelectorProps) {
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative w-full sm:w-72 group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-charcoal-500 group-focus-within:text-amber-500 transition-colors z-10" />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Search models..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
@@ -272,9 +270,9 @@ export function ModelSelector({ models }: ModelSelectorProps) {
               />
               <div className="absolute inset-0 rounded-xl bg-amber-500/5 opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
             </div>
-            
+
             <div className="relative">
-              <select 
+              <select
                 value={providerFilter || ""}
                 onChange={e => setProviderFilter(e.target.value || null)}
                 className="w-full sm:w-56 h-12 px-4 rounded-xl bg-charcoal-950 border border-charcoal-800 focus:border-amber-500/50 outline-none text-charcoal-200 appearance-none font-medium shadow-inner cursor-pointer hover:border-charcoal-600 transition-colors"
@@ -284,7 +282,7 @@ export function ModelSelector({ models }: ModelSelectorProps) {
                 {providers.map(p => <option key={p} value={p}>{p}</option>)}
               </select>
               <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-charcoal-500">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6" /></svg>
               </div>
             </div>
           </div>
@@ -302,7 +300,7 @@ export function ModelSelector({ models }: ModelSelectorProps) {
               const stats = getPremiumStats(m);
 
               return (
-                <motion.div 
+                <motion.div
                   key={m.id}
                   layout
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -310,11 +308,10 @@ export function ModelSelector({ models }: ModelSelectorProps) {
                   exit={{ opacity: 0, scale: 0.95 }}
                   whileHover={{ y: -4, backgroundColor: "rgba(23, 23, 23, 1)" }}
                   onClick={() => handleSelect(m.id)}
-                  className={`group relative p-5 rounded-2xl border transition-all duration-300 cursor-pointer overflow-hidden ${
-                    isSelected 
-                      ? "bg-charcoal-800 border-amber-500 shadow-[0_0_20px_rgba(212,175,55,0.15)]" 
+                  className={`group relative p-5 rounded-2xl border transition-all duration-300 cursor-pointer overflow-hidden ${isSelected
+                      ? "bg-charcoal-800 border-amber-500 shadow-[0_0_20px_rgba(212,175,55,0.15)]"
                       : "bg-charcoal-950 border-charcoal-800/50 hover:border-amber-500/30"
-                  }`}
+                    }`}
                 >
                   {/* Subtle Background Glow on Hover */}
                   <div className="absolute -inset-4 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity blur-xl pointer-events-none" />
@@ -322,9 +319,8 @@ export function ModelSelector({ models }: ModelSelectorProps) {
                   <div className="relative z-10 flex flex-col h-full gap-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-display font-bold shrink-0 border ${
-                          isSelected ? "bg-amber-500/20 text-amber-500 border-amber-500/40" : "bg-charcoal-800 text-charcoal-300 border-charcoal-700 group-hover:border-amber-500/30"
-                        }`}>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-display font-bold shrink-0 border ${isSelected ? "bg-amber-500/20 text-amber-500 border-amber-500/40" : "bg-charcoal-800 text-charcoal-300 border-charcoal-700 group-hover:border-amber-500/30"
+                          }`}>
                           {stats.initial}
                         </div>
                         <div className="min-w-0">
@@ -334,7 +330,7 @@ export function ModelSelector({ models }: ModelSelectorProps) {
                           <p className="text-[0.7rem] uppercase tracking-wider text-charcoal-400 font-semibold">{m.provider}</p>
                         </div>
                       </div>
-                      
+
                       {isSelected ? (
                         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(212,175,55,0.4)]">
                           <Check className="w-3.5 h-3.5 text-amber-950 stroke-[3]" />
@@ -347,13 +343,13 @@ export function ModelSelector({ models }: ModelSelectorProps) {
                         )
                       )}
                     </div>
-                    
+
                     <div className="flex flex-wrap items-center gap-2 mt-auto pt-2 border-t border-charcoal-800/50">
                       <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-charcoal-900 border border-charcoal-800 text-charcoal-300 text-xs font-mono">
                         <Cpu className="w-3 h-3 text-charcoal-500" />
                         {(m.context_length / 1000).toFixed(0)}k
                       </div>
-                      
+
                       <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-charcoal-900 border border-charcoal-800 text-charcoal-300 text-xs font-mono">
                         <Zap className="w-3 h-3 text-amber-500/70" />
                         {stats.speed}
@@ -386,8 +382,8 @@ export function ModelSelector({ models }: ModelSelectorProps) {
 function UserIcon() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-      <circle cx="12" cy="7" r="4"/>
+      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
     </svg>
   );
 }
