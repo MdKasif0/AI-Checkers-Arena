@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { createMatch } from "@/lib/supabase/queries";
+import { createMatch, finalizeMatch } from "@/lib/supabase/queries";
 
 export async function startMatch(formData: FormData) {
   const whiteModel = formData.get("whiteModel") as string;
@@ -57,4 +57,8 @@ export async function startMatch(formData: FormData) {
 
   const match = await createMatch({ whiteModel, blackModel, mode });
   redirect(`/match/${match.id}`);
+}
+
+export async function stopMatchAction(matchId: string) {
+  await finalizeMatch(matchId, null, "stopped_by_user");
 }

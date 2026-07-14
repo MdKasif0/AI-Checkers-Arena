@@ -7,7 +7,8 @@ export type MatchResultReason =
   | "no_pieces"
   | "no_legal_moves"
   | "25_move_rule"
-  | "resignation";
+  | "resignation"
+  | "stopped_by_user";
 
 export interface CreateMatchParams {
   whiteModel: string;

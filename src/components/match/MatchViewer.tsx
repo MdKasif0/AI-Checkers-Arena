@@ -7,8 +7,9 @@ import { createInitialState, applyMove, notationToMove, getLegalMoves, GameState
 import { Board } from "@/components/board";
 import { ModelPanel } from "./ModelPanel";
 import { MoveHistory } from "./MoveHistory";
-import { Shield, Copy, Circle } from "lucide-react";
+import { Shield, Copy, Circle, Square } from "lucide-react";
 import { motion } from "framer-motion";
+import { stopMatchAction } from "@/app/actions";
 
 interface MatchViewerProps {
   match: MatchDB;
@@ -103,6 +104,21 @@ export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
     navigator.clipboard.writeText(match.id);
   };
 
+  const handleStopMatch = async () => {
+    if (match.status === "completed" || isProcessing) return;
+    setIsProcessing(true);
+    processingRef.current = true;
+    try {
+      await stopMatchAction(match.id);
+      router.refresh();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsProcessing(false);
+      processingRef.current = false;
+    }
+  };
+
   return (
     <div className="w-full flex-1 flex flex-col font-sans bg-[#0a0a0a]">
       {/* Header */}
@@ -122,17 +138,27 @@ export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
         
         <div className="flex items-center gap-4">
           {match.status === "in_progress" && !isHumanTurn && (
-            <div className="px-4 py-2 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-500 text-xs font-semibold flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-              </span>
-              Auto-playing AI match
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={handleStopMatch}
+                disabled={isProcessing}
+                className="px-4 py-2 rounded-full border border-red-500/20 bg-red-500/10 text-red-500 hover:bg-red-500/20 text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-colors disabled:opacity-50"
+              >
+                <Square className="w-3 h-3 fill-current" />
+                Stop Match
+              </button>
+              <div className="px-4 py-2 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-500 text-xs font-semibold flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                </span>
+                Auto-playing AI match
+              </div>
             </div>
           )}
           {match.status === "completed" && (
             <div className="px-4 py-2 rounded-full border border-charcoal-700 bg-charcoal-800 text-charcoal-300 text-xs font-semibold">
-              Completed - Winner: {match.winner || "Draw"}
+              Completed - {match.winner ? `Winner: ${match.winner}` : `Draw (${match.reason})`}
             </div>
           )}
         </div>
