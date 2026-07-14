@@ -12,7 +12,7 @@ interface BoardProps {
   legalMoves: Move[];
 }
 
-export function Board({ board, lastMove, legalMoves }: BoardProps) {
+export function Board({ board, lastMove }: BoardProps) {
   const pieces = usePieces(board, lastMove);
 
   // Determine squares to highlight (e.g., from and to of lastMove)

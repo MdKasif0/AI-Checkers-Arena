@@ -5,12 +5,11 @@ import { Board } from "@/components/board";
 import { createInitialState, getLegalMoves, applyMove, GameState, Move } from "@/lib/engine";
 
 export default function Home() {
-  const [gameState, setGameState] = useState<GameState | null>(null);
+  const [gameState, setGameState] = useState<GameState>(createInitialState());
   const [lastMove, setLastMove] = useState<Move | null>(null);
 
   useEffect(() => {
     let current = createInitialState();
-    setGameState(current);
 
     const interval = setInterval(() => {
       if (current.status !== "playing") {
