@@ -40,12 +40,33 @@
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
 
-  /* Amber/gold accent color tokens */
-  --color-amber: var(--amber);
-  --color-amber-foreground: var(--amber-foreground);
-  --color-amber-muted: var(--amber-muted);
+  /* ── Custom charcoal scale ── */
+  --color-charcoal-950: oklch(0.10 0.005 85);
+  --color-charcoal-900: oklch(0.12 0.005 85);
+  --color-charcoal-800: oklch(0.16 0.006 85);
+  --color-charcoal-700: oklch(0.22 0.008 85);
+  --color-charcoal-600: oklch(0.30 0.010 85);
+  --color-charcoal-500: oklch(0.40 0.012 85);
+  --color-charcoal-400: oklch(0.50 0.015 85);
+  --color-charcoal-300: oklch(0.60 0.015 85);
+  --color-charcoal-200: oklch(0.75 0.010 85);
+  --color-charcoal-100: oklch(0.88 0.006 85);
+  --color-charcoal-50:  oklch(0.95 0.003 85);
 
-  /* Tightened radius scale */
+  /* ── Custom amber/gold accent scale ── */
+  --color-amber-950: oklch(0.22 0.06 70);
+  --color-amber-900: oklch(0.30 0.09 70);
+  --color-amber-800: oklch(0.40 0.12 70);
+  --color-amber-700: oklch(0.50 0.14 70);
+  --color-amber-600: oklch(0.60 0.16 70);
+  --color-amber-500: oklch(0.70 0.16 70);
+  --color-amber-400: oklch(0.75 0.15 70);
+  --color-amber-300: oklch(0.82 0.12 72);
+  --color-amber-200: oklch(0.88 0.08 75);
+  --color-amber-100: oklch(0.93 0.04 78);
+  --color-amber-50:  oklch(0.97 0.02 80);
+
+  /* ── Tightened radius scale ── */
   --radius-sm: calc(var(--radius) * 0.5);
   --radius-md: calc(var(--radius) * 0.75);
   --radius-lg: var(--radius);
@@ -57,20 +78,20 @@
 
 /*
  * AI Checkers Arena — Dark Amber/Gold Theme
- * 
+ *
  * Color philosophy: charcoal/near-black base, warm amber/gold sole accent.
- * Zero purple, zero blue — anywhere.
+ * All hues in the 25–85 range. Zero purple (≈290), zero blue (≈260) — anywhere.
  */
 
 :root {
-  /* Light mode (fallback — app forces dark) */
+  /* Light mode (fallback — app forces dark class) */
   --background: oklch(0.985 0.003 85);
   --foreground: oklch(0.145 0.005 85);
   --card: oklch(0.975 0.003 85);
   --card-foreground: oklch(0.145 0.005 85);
   --popover: oklch(0.975 0.003 85);
   --popover-foreground: oklch(0.145 0.005 85);
-  --primary: oklch(0.55 0.16 75);
+  --primary: oklch(0.55 0.16 70);
   --primary-foreground: oklch(0.985 0.003 85);
   --secondary: oklch(0.94 0.01 85);
   --secondary-foreground: oklch(0.205 0.005 85);
@@ -78,27 +99,24 @@
   --muted-foreground: oklch(0.5 0.01 85);
   --accent: oklch(0.94 0.015 80);
   --accent-foreground: oklch(0.205 0.005 85);
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: oklch(0.577 0.245 27);
   --border: oklch(0.88 0.01 85);
   --input: oklch(0.88 0.01 85);
-  --ring: oklch(0.65 0.16 75);
+  --ring: oklch(0.65 0.16 70);
   --chart-1: oklch(0.75 0.15 70);
-  --chart-2: oklch(0.65 0.13 75);
-  --chart-3: oklch(0.55 0.11 80);
-  --chart-4: oklch(0.45 0.08 85);
+  --chart-2: oklch(0.65 0.13 72);
+  --chart-3: oklch(0.55 0.11 75);
+  --chart-4: oklch(0.45 0.08 80);
   --chart-5: oklch(0.35 0.05 85);
   --radius: 0.5rem;
-  --amber: oklch(0.75 0.15 70);
-  --amber-foreground: oklch(0.15 0.005 85);
-  --amber-muted: oklch(0.85 0.08 75);
   --sidebar: oklch(0.97 0.003 85);
   --sidebar-foreground: oklch(0.145 0.005 85);
-  --sidebar-primary: oklch(0.55 0.16 75);
+  --sidebar-primary: oklch(0.55 0.16 70);
   --sidebar-primary-foreground: oklch(0.985 0.003 85);
   --sidebar-accent: oklch(0.94 0.015 80);
   --sidebar-accent-foreground: oklch(0.205 0.005 85);
   --sidebar-border: oklch(0.88 0.01 85);
-  --sidebar-ring: oklch(0.65 0.16 75);
+  --sidebar-ring: oklch(0.65 0.16 70);
 }
 
 .dark {
@@ -121,13 +139,10 @@
   --input: oklch(1 0 0 / 12%);
   --ring: oklch(0.75 0.15 70);
   --chart-1: oklch(0.75 0.15 70);
-  --chart-2: oklch(0.65 0.12 75);
-  --chart-3: oklch(0.55 0.09 80);
-  --chart-4: oklch(0.42 0.06 85);
+  --chart-2: oklch(0.65 0.12 72);
+  --chart-3: oklch(0.55 0.09 75);
+  --chart-4: oklch(0.42 0.06 80);
   --chart-5: oklch(0.30 0.03 85);
-  --amber: oklch(0.75 0.15 70);
-  --amber-foreground: oklch(0.12 0.005 85);
-  --amber-muted: oklch(0.35 0.06 75);
   --sidebar: oklch(0.16 0.006 85);
   --sidebar-foreground: oklch(0.93 0.01 85);
   --sidebar-primary: oklch(0.75 0.15 70);
