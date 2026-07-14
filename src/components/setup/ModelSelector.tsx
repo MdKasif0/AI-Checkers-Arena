@@ -74,7 +74,8 @@ export function ModelSelector({ models }: ModelSelectorProps) {
   const showFullCatalog = search.length > 0 || providerFilter !== null;
   const displayModels = showFullCatalog 
     ? models.filter(m => {
-        if (providerFilter && m.provider !== providerFilter) return false;
+        if (providerFilter === "FREE" && !m.is_free) return false;
+        if (providerFilter && providerFilter !== "FREE" && m.provider !== providerFilter) return false;
         if (search && !m.name.toLowerCase().includes(search.toLowerCase()) && !m.id.toLowerCase().includes(search.toLowerCase())) return false;
         return true;
       })
@@ -199,6 +200,7 @@ export function ModelSelector({ models }: ModelSelectorProps) {
             className="md:w-64 p-3 rounded-xl bg-charcoal-900 border border-charcoal-800 focus:border-amber-500 outline-none text-charcoal-100"
           >
             <option value="">All Providers</option>
+            <option value="FREE">💰 Free Models</option>
             {providers.map(p => <option key={p} value={p}>{p}</option>)}
           </select>
         </div>
@@ -247,6 +249,11 @@ export function ModelSelector({ models }: ModelSelectorProps) {
                   {isSelected && <div className="w-2 h-2 rounded-full bg-amber-500 shrink-0 mt-2" />}
                 </div>
                 <div className="flex items-center gap-2 mt-auto">
+                  {m.is_free && (
+                    <span className="px-2 py-1 rounded bg-amber-500/20 text-amber-500 border border-amber-500/30 text-[0.65rem] font-bold uppercase tracking-wider">
+                      Free
+                    </span>
+                  )}
                   <span className="px-2 py-1 rounded bg-charcoal-800 text-charcoal-400 text-[0.65rem] font-bold uppercase tracking-wider">
                     {m.provider}
                   </span>

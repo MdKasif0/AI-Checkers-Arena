@@ -3,6 +3,7 @@ export interface ORModel {
   name: string;
   context_length: number;
   provider: string;
+  is_free: boolean;
 }
 
 export const DEFAULT_SHORTLIST = [
@@ -28,11 +29,12 @@ export async function fetchModels(): Promise<ORModel[]> {
     if (!res.ok) throw new Error("Failed to fetch models");
     
     const data = await res.json();
-    return data.data.map((m: { id: string, name: string, context_length: number }) => ({
+    return data.data.map((m: { id: string, name: string, context_length: number, pricing?: { prompt: string, completion: string } }) => ({
       id: m.id,
       name: m.name,
       context_length: m.context_length,
-      provider: m.id.split('/')[0]
+      provider: m.id.split('/')[0],
+      is_free: m.pricing?.prompt === "0" && m.pricing?.completion === "0"
     }));
   } catch (error) {
     console.error("Failed to fetch OpenRouter models:", error);

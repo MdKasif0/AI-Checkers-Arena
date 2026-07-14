@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { MatchDB, MoveDB } from "./types";
 import { createInitialState, applyMove, notationToMove, getLegalMoves, GameState, Move } from "@/lib/engine";
 import { Board } from "@/components/board";
@@ -53,11 +53,14 @@ export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
     setIsProcessing(true);
     try {
       const res = await fetch(`/api/match/${match.id}/turn`, { method: "POST" });
-      if (!res.ok) throw new Error("Failed to process turn");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(`Failed to process turn: ${res.status} ${errData.error || ""}`);
+      }
       window.location.reload();
     } catch (e) {
       console.error(e);
-      alert("Error processing turn");
+      alert(e instanceof Error ? e.message : "Error processing turn");
     } finally {
       setIsProcessing(false);
     }
@@ -65,6 +68,14 @@ export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
 
   const isHumanTurn = isLive && match.mode === "human_vs_ai" && 
     (activeState.currentPlayer === "white" ? match.white_model === "human" : match.black_model === "human");
+
+  // Auto-play AI turns
+  useEffect(() => {
+    if (match.status === "in_progress" && !isHumanTurn && isLive && !isProcessing) {
+      handleNextTurn();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [match.status, isHumanTurn, isLive, isProcessing]);
 
   const currentLegalMoves = useMemo(() => {
     if (!isLive) return [];
@@ -104,17 +115,10 @@ export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
             </span>
           )}
           {match.status === "in_progress" && !isHumanTurn && (
-            <button
-              onClick={handleNextTurn}
-              disabled={isProcessing || !isLive}
-              className={`px-4 py-2 font-bold rounded shadow-lg transition-all ${
-                isProcessing || !isLive 
-                  ? "bg-charcoal-800 text-charcoal-500 cursor-not-allowed" 
-                  : "bg-amber-500 text-amber-950 hover:bg-amber-400 hover:scale-105 active:scale-95"
-              }`}
-            >
-              {isProcessing ? "Computing..." : "Play AI Turn"}
-            </button>
+            <span className="px-4 py-2 font-bold rounded shadow-lg bg-charcoal-800 text-charcoal-300 border border-charcoal-700 flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              Auto-playing AI...
+            </span>
           )}
           {match.status === "in_progress" && isHumanTurn && (
             <span className="px-4 py-2 font-bold rounded shadow-lg bg-emerald-500 text-emerald-950 animate-pulse">
