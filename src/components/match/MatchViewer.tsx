@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { MatchDB, MoveDB } from "./types";
 import { createInitialState, applyMove, notationToMove, getLegalMoves, GameState, Move } from "@/lib/engine";
 import { Board } from "@/components/board";
@@ -18,6 +18,7 @@ export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
   const [moves] = useState<MoveDB[]>(initialMoves);
   const [currentPlyIndex, setCurrentPlyIndex] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const processingRef = useRef(false);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(2.0);
 
   const states = useMemo(() => {
@@ -46,8 +47,9 @@ export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
     : moves[currentPlyIndex];
 
   const handleNextTurn = async () => {
-    if (match.status === "completed") return;
+    if (match.status === "completed" || processingRef.current) return;
     setIsProcessing(true);
+    processingRef.current = true;
     try {
       const res = await fetch(`/api/match/${match.id}/turn`, { method: "POST" });
       if (!res.ok) {
@@ -57,6 +59,7 @@ export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
       window.location.reload();
     } catch (e) {
       console.error(e);
+      processingRef.current = false;
     } finally {
       setIsProcessing(false);
     }
@@ -66,11 +69,11 @@ export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
     (activeState.currentPlayer === "white" ? match.white_model === "human" : match.black_model === "human");
 
   useEffect(() => {
-    if (match.status === "in_progress" && !isHumanTurn && isLive && !isProcessing) {
+    if (match.status === "in_progress" && !isHumanTurn && isLive && !processingRef.current) {
       handleNextTurn();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [match.status, isHumanTurn, isLive, isProcessing]);
+  }, [match.status, isHumanTurn, isLive]);
 
   const currentLegalMoves = useMemo(() => {
     if (!isLive) return [];

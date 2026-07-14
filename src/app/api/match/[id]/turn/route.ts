@@ -35,8 +35,13 @@ export async function POST(
 
     let state: GameState = createInitialState();
 
-    // Replay historical moves to arrive at the current engine state
+    // Replay historical moves to arrive at the current engine state.
+    // Deduplicate by ply_number to safely ignore any race-condition duplicate inserts.
+    let currentPly = 0;
     for (const ply of moves) {
+      if (ply.ply_number <= currentPly) continue;
+      currentPly = ply.ply_number;
+
       const legalMoves = getLegalMoves(state.board, state.currentPlayer);
       const parsedMove = notationToMove(ply.notation, legalMoves);
       if (!parsedMove) {
