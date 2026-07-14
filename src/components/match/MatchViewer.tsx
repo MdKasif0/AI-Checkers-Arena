@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { MatchDB, MoveDB } from "./types";
 import { createInitialState, applyMove, notationToMove, getLegalMoves, GameState, Move } from "@/lib/engine";
 import { Board } from "@/components/board";
@@ -15,7 +16,8 @@ interface MatchViewerProps {
 }
 
 export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
-  const [moves] = useState<MoveDB[]>(initialMoves);
+  const router = useRouter();
+  const moves = initialMoves;
   const [currentPlyIndex, setCurrentPlyIndex] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const processingRef = useRef(false);
@@ -56,7 +58,7 @@ export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
         const errData = await res.json().catch(() => ({}));
         throw new Error(`Failed to process turn: ${res.status} ${errData.error || ""}`);
       }
-      window.location.reload();
+      router.refresh();
     } catch (e) {
       console.error(e);
       processingRef.current = false;
@@ -90,7 +92,7 @@ export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
         body: JSON.stringify({ moveNotation: notation })
       });
       if (!res.ok) throw new Error("Failed to submit move");
-      window.location.reload();
+      router.refresh();
     } catch (e) {
       console.error(e);
       setIsProcessing(false);
