@@ -1,16 +1,42 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Crown, Sun, User } from "lucide-react";
+import { motion } from "framer-motion";
 
 export function Navbar() {
   return (
-    <nav className="w-full bg-charcoal-950/80 backdrop-blur-md border-b border-charcoal-800 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-        <Link href="/" className="text-xl font-display font-bold text-amber-500 hover:text-amber-400 transition-colors">
-          AI Checkers Arena
+    <nav className="w-full h-[80px] bg-charcoal-950/60 backdrop-blur-xl border-b border-white/5 sticky top-0 z-50 transition-all duration-300">
+      <div className="max-w-[1500px] w-full mx-auto px-6 md:px-10 h-full flex items-center justify-between">
+        
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-3 group">
+          <Crown className="w-6 h-6 text-amber-500 group-hover:text-amber-400 transition-colors" />
+          <span className="text-xl font-display font-bold text-charcoal-100 uppercase tracking-widest flex gap-1">
+            AI Checkers <span className="text-amber-500 font-medium">Arena</span>
+          </span>
         </Link>
-        <div className="flex items-center gap-6">
+
+        {/* Centered Navigation */}
+        <div className="hidden lg:flex items-center gap-1">
           <NavLink href="/" label="Arena" />
           <NavLink href="/history" label="History" />
           <NavLink href="/leaderboard" label="Leaderboard" />
+          <NavLink href="/tournament" label="Tournament" />
+          <NavLink href="/about" label="About" />
+        </div>
+
+        {/* Right side controls */}
+        <div className="flex items-center gap-4">
+          <button className="p-2 rounded-full text-charcoal-400 hover:text-amber-500 hover:bg-charcoal-800 transition-colors">
+            <Sun className="w-5 h-5" />
+          </button>
+          
+          <button className="flex items-center gap-2 px-5 py-2 rounded-full border border-charcoal-600 hover:border-amber-500/50 text-sm font-medium text-charcoal-100 hover:text-amber-400 transition-all">
+            <User className="w-4 h-4" />
+            <span>Sign In</span>
+          </button>
         </div>
       </div>
     </nav>
@@ -18,9 +44,24 @@ export function Navbar() {
 }
 
 function NavLink({ href, label }: { href: string; label: string }) {
+  const pathname = usePathname();
+  const isActive = pathname === href;
+
   return (
-    <Link href={href} className="text-sm font-semibold uppercase tracking-wider text-charcoal-300 hover:text-white transition-colors">
+    <Link 
+      href={href} 
+      className={`relative px-5 py-2 text-sm font-medium tracking-wide transition-colors ${
+        isActive ? "text-charcoal-100" : "text-charcoal-400 hover:text-charcoal-200"
+      }`}
+    >
       {label}
+      {isActive && (
+        <motion.div 
+          layoutId="nav-indicator"
+          className="absolute bottom-[-24px] left-1/2 -translate-x-1/2 w-8 h-[2px] bg-amber-500 rounded-full"
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        />
+      )}
     </Link>
   );
 }

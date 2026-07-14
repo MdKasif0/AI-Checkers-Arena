@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Space_Grotesk, Geist_Mono } from "next/font/google";
+import { Playfair_Display, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 
@@ -10,15 +10,15 @@ const playfairDisplay = Playfair_Display({
   weight: ["400", "500", "600", "700", "800", "900"],
 });
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
+const inter = Inter({
+  variable: "--font-space-grotesk", // keeping the variable name identical so Tailwind doesn't break
   subsets: ["latin"],
   display: "swap",
   weight: ["300", "400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-geist-mono", // keeping the variable name identical
   subsets: ["latin"],
 });
 
@@ -39,9 +39,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${playfairDisplay.variable} ${spaceGrotesk.variable} ${geistMono.variable} dark h-full antialiased`}
+      className={`${playfairDisplay.variable} ${inter.variable} ${jetbrainsMono.variable} dark h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-charcoal-950 text-white">
+      <body className="min-h-full flex flex-col bg-charcoal-950 text-charcoal-100 selection:bg-amber-500/30">
         <Navbar />
         <main className="flex-1 flex flex-col">
           {children}
