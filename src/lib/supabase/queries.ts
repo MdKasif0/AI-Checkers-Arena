@@ -12,6 +12,7 @@ export type MatchResultReason =
 export interface CreateMatchParams {
   whiteModel: string;
   blackModel: string;
+  mode?: "ai_vs_ai" | "human_vs_ai";
 }
 
 /**
@@ -24,6 +25,7 @@ export async function createMatch({ whiteModel, blackModel }: CreateMatchParams)
       white_model: whiteModel,
       black_model: blackModel,
       status: "in_progress",
+      mode: mode || "ai_vs_ai",
     })
     .select()
     .single();
@@ -38,9 +40,9 @@ export interface AppendMoveParams {
   player: PlayerColor;
   notation: string;
   reasoningText?: string;
-  latencyMs: number;
-  tokensUsed: number;
-  wasIllegalAttempt: boolean;
+  latencyMs?: number;
+  tokensUsed?: number;
+  wasIllegalAttempt?: boolean;
 }
 
 /**
@@ -108,6 +110,18 @@ export async function updateModelStats(
   winner: PlayerColor | null,
   matchId: string
 ) {
+  // 1. Fetch match to check mode
+  const { data: match } = await supabase
+    .from("matches")
+    .select("mode")
+    .eq("id", matchId)
+    .single();
+
+  if (match?.mode === "human_vs_ai") {
+    console.log("Skipping leaderboard update for human vs ai match.");
+    return;
+  }
+
   // 1. Fetch current stats for both models
   const { data: whiteData } = await supabase
     .from("model_stats")

@@ -6,6 +6,7 @@ import { createMatch } from "@/lib/supabase/queries";
 export async function startMatch(formData: FormData) {
   const whiteModel = formData.get("whiteModel") as string;
   const blackModel = formData.get("blackModel") as string;
+  const mode = formData.get("mode") as "ai_vs_ai" | "human_vs_ai" || "ai_vs_ai";
 
   if (!whiteModel || !blackModel) {
     return { error: "Both models are required" };
@@ -46,11 +47,14 @@ export async function startMatch(formData: FormData) {
   };
 
   try {
-    await Promise.all([pingModel(whiteModel), pingModel(blackModel)]);
+    const promises = [];
+    if (whiteModel !== "human") promises.push(pingModel(whiteModel));
+    if (blackModel !== "human") promises.push(pingModel(blackModel));
+    await Promise.all(promises);
   } catch (error: unknown) {
     return { error: error instanceof Error ? error.message : String(error) };
   }
 
-  const match = await createMatch({ whiteModel, blackModel });
+  const match = await createMatch({ whiteModel, blackModel, mode });
   redirect(`/match/${match.id}`);
 }

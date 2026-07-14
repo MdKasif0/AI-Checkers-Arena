@@ -47,20 +47,44 @@ export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
     ? moves[moves.length - 1] 
     : moves[currentPlyIndex];
 
-  // Manual Next Turn
+  // Manual Next Turn (for manual testing or AI fallbacks)
   const handleNextTurn = async () => {
     if (match.status === "completed") return;
     setIsProcessing(true);
     try {
       const res = await fetch(`/api/match/${match.id}/turn`, { method: "POST" });
       if (!res.ok) throw new Error("Failed to process turn");
-      
-      // We just reload the page to get the fresh SSR data.
       window.location.reload();
     } catch (e) {
       console.error(e);
       alert("Error processing turn");
     } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const isHumanTurn = isLive && match.mode === "human_vs_ai" && 
+    (activeState.currentPlayer === "white" ? match.white_model === "human" : match.black_model === "human");
+
+  const currentLegalMoves = useMemo(() => {
+    if (!isLive) return [];
+    return getLegalMoves(activeState.board, activeState.currentPlayer);
+  }, [activeState, isLive]);
+
+  const handleHumanMove = async (notation: string) => {
+    if (!isHumanTurn || isProcessing) return;
+    setIsProcessing(true);
+    try {
+      const res = await fetch(`/api/match/${match.id}/turn`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ moveNotation: notation })
+      });
+      if (!res.ok) throw new Error("Failed to submit move");
+      window.location.reload();
+    } catch (e) {
+      console.error(e);
+      alert("Error submitting move");
       setIsProcessing(false);
     }
   };
@@ -79,7 +103,7 @@ export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
               Completed - Winner: {match.winner || "Draw"}
             </span>
           )}
-          {match.status === "in_progress" && (
+          {match.status === "in_progress" && !isHumanTurn && (
             <button
               onClick={handleNextTurn}
               disabled={isProcessing || !isLive}
@@ -89,8 +113,13 @@ export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
                   : "bg-amber-500 text-amber-950 hover:bg-amber-400 hover:scale-105 active:scale-95"
               }`}
             >
-              {isProcessing ? "Computing..." : "Play Next Turn"}
+              {isProcessing ? "Computing..." : "Play AI Turn"}
             </button>
+          )}
+          {match.status === "in_progress" && isHumanTurn && (
+            <span className="px-4 py-2 font-bold rounded shadow-lg bg-emerald-500 text-emerald-950 animate-pulse">
+              {isProcessing ? "Submitting..." : "Your Turn"}
+            </span>
           )}
         </div>
       </header>
@@ -113,7 +142,9 @@ export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
           <Board 
             board={activeState.board} 
             lastMove={activeLastMove} 
-            legalMoves={[]} 
+            legalMoves={currentLegalMoves}
+            isHumanTurn={isHumanTurn}
+            onHumanMove={handleHumanMove}
           />
           <ReasoningPanel currentMove={currentMoveDb} />
         </div>
