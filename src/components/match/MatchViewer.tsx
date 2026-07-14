@@ -158,7 +158,7 @@ export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
           )}
           {match.status === "completed" && (
             <div className="px-4 py-2 rounded-full border border-charcoal-700 bg-charcoal-800 text-charcoal-300 text-xs font-semibold">
-              Completed - {match.winner ? `Winner: ${match.winner}` : `Draw (${match.reason})`}
+              Completed - {match.winner ? `Winner: ${match.winner}` : `Draw (${match.result_reason})`}
             </div>
           )}
         </div>
