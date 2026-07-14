@@ -1,36 +1,46 @@
-import Link from "next/link";
+"use client";
 
-export default function HomePage() {
+import { useEffect, useState } from "react";
+import { Board } from "@/components/board";
+import { createInitialState, getLegalMoves, applyMove, GameState, Move } from "@/lib/engine";
+
+export default function Home() {
+  const [gameState, setGameState] = useState<GameState | null>(null);
+  const [lastMove, setLastMove] = useState<Move | null>(null);
+
+  useEffect(() => {
+    let current = createInitialState();
+    setGameState(current);
+
+    const interval = setInterval(() => {
+      if (current.status !== "playing") {
+        clearInterval(interval);
+        return;
+      }
+      const legals = getLegalMoves(current.board, current.currentPlayer);
+      if (legals.length === 0) {
+        clearInterval(interval);
+        return;
+      }
+      
+      // Randomly pick a legal move
+      const move = legals[Math.floor(Math.random() * legals.length)];
+      current = applyMove(current, move);
+      
+      setLastMove(move);
+      setGameState(current);
+    }, 1000); // 1 move per second
+
+    return () => clearInterval(interval);
+  }, []);
+
+  if (!gameState) return null;
+
   return (
-    <main className="flex-1 flex flex-col items-center justify-center gap-8 p-8">
-      <div className="text-center space-y-4">
-        <h1 className="text-5xl font-bold tracking-tight">
-          AI Checkers Arena
-        </h1>
-        <p className="text-muted-foreground text-lg max-w-md mx-auto">
-          Watch AI models compete head-to-head in live checkers matches.
-        </p>
-      </div>
-
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Link
-          href="/match/new"
-          className="inline-flex items-center justify-center rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-        >
-          New Match
-        </Link>
-        <Link
-          href="/history"
-          className="inline-flex items-center justify-center rounded-md border border-border bg-secondary px-6 py-3 text-sm font-medium text-secondary-foreground transition-colors hover:bg-accent"
-        >
-          Match History
-        </Link>
-        <Link
-          href="/leaderboard"
-          className="inline-flex items-center justify-center rounded-md border border-border bg-secondary px-6 py-3 text-sm font-medium text-secondary-foreground transition-colors hover:bg-accent"
-        >
-          Leaderboard
-        </Link>
+    <main className="min-h-screen bg-charcoal-950 p-8 flex flex-col items-center justify-center">
+      <h1 className="text-4xl font-display text-amber-500 mb-8">Board Animation Test</h1>
+      <div className="w-full max-w-2xl">
+        <Board board={gameState.board} lastMove={lastMove} legalMoves={[]} />
       </div>
     </main>
   );
