@@ -1,29 +1,42 @@
-import { GameState, Move, notationToMove } from "../engine";
+import { GameState, Move, notationToMove, moveToNotation } from "../engine";
 import { generatePrompt } from "./prompt";
 import { AiMoveResult, OpenRouterResponse } from "./types";
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 /**
- * Robustly extracts the first JSON object from a potentially messy LLM output string.
+ * Robustly extracts a move JSON from a potentially messy LLM output string.
+ * Handles markdown code blocks, extra whitespace, and partial outputs.
  */
-export function extractJson(text: string): OpenRouterResponse {
-  const match = text.match(/\{[\s\S]*\}/);
-  if (!match) {
-    throw new Error("No JSON object found in the response.");
+export function extractJson(text: string, legalNotations: string[]): OpenRouterResponse {
+  // Strip markdown code fences if present
+  let cleaned = text.replace(/```(?:json)?\s*/gi, "").replace(/```/g, "").trim();
+  
+  // Try to find a JSON object
+  const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    try {
+      const parsed = JSON.parse(jsonMatch[0]);
+      if (typeof parsed.move === "string" && typeof parsed.reason === "string") {
+        return parsed as OpenRouterResponse;
+      }
+      // Some models return { move: "..." } without reason
+      if (typeof parsed.move === "string") {
+        return { move: parsed.move, reason: "No reason provided" };
+      }
+    } catch {
+      // JSON parse failed, fall through to text extraction
+    }
   }
 
-  try {
-    const parsed = JSON.parse(match[0]);
-    if (typeof parsed.move !== "string" || typeof parsed.reason !== "string") {
-      throw new Error(
-        "JSON does not match the required schema {move: string, reason: string}."
-      );
+  // Fallback: try to find a legal move notation directly in the text
+  for (const notation of legalNotations) {
+    if (cleaned.includes(notation)) {
+      return { move: notation, reason: "Extracted from raw model output" };
     }
-    return parsed as OpenRouterResponse;
-  } catch (e) {
-    throw new Error(`Failed to parse JSON: ${(e as Error).message}`);
   }
+
+  throw new Error(`No valid JSON or move found in response: "${text.substring(0, 200)}"`)
 }
 
 /**
@@ -94,10 +107,12 @@ export async function getOpenRouterMove(
       const tokensUsed = data.usage?.total_tokens || 0;
       const content = data.choices?.[0]?.message?.content || "";
 
-      const parsed = extractJson(content);
+      const moveNotations = legalMoves.map(m => moveToNotation(m));
+      const parsed = extractJson(content, moveNotations);
       const chosenMove = notationToMove(parsed.move, legalMoves);
 
       if (!chosenMove) {
+        console.warn(`[AI] Model ${modelId} attempt ${attempts}: illegal move "${parsed.move}". Raw: "${content.substring(0, 200)}"`);
         throw new Error(
           `Model returned an illegal or unlisted move: ${parsed.move}`
         );
