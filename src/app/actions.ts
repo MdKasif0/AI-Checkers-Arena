@@ -31,7 +31,7 @@ export async function startMatch(formData: FormData) {
           messages: [{ role: "user", content: "ping" }],
           max_tokens: 1
         }),
-        signal: AbortSignal.timeout(5000)
+        signal: AbortSignal.timeout(30000)
       });
       if (!res.ok) {
         let msg = res.statusText;

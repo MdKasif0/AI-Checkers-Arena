@@ -8,13 +8,13 @@ export interface ORModel {
 
 export const DEFAULT_SHORTLIST = [
   "openai/gpt-5.6-sol",
-  "openai/o3-mini",
+  "anthropic/claude-fable-5",
   "google/gemini-2.5-flash",
-  "meta-llama/llama-3.3-70b-instruct",
-  "anthropic/claude-3.7-sonnet",
   "deepseek/deepseek-r1",
-  "mistralai/mistral-large-2411",
-  "google/gemma-2-27b-it"
+  "openai/o3-mini",
+  "anthropic/claude-sonnet-5",
+  "meta-llama/llama-3.3-70b-instruct",
+  "mistralai/mistral-large"
 ];
 
 /**

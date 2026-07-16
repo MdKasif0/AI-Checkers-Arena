@@ -55,18 +55,27 @@ export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
     processingRef.current = true;
     try {
       const res = await fetch(`/api/match/${match.id}/turn`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(`Failed to process turn: ${res.status} ${errData.error || ""}`);
+        throw new Error(`Failed to process turn: ${res.status} ${data.error || ""}`);
       }
-      // Reset the ref BEFORE refresh so the next render cycle can trigger the next turn
+      // Reset refs BEFORE refresh so the next render cycle can trigger the next turn
       processingRef.current = false;
       setIsProcessing(false);
+      // If game is over, just refresh to show final state
+      if (data.status === "game_over") {
+        router.refresh();
+        return;
+      }
+      // Small delay to let Next.js server component re-fetch before we re-trigger
+      await new Promise(resolve => setTimeout(resolve, 500));
       router.refresh();
     } catch (e) {
       console.error(e);
       processingRef.current = false;
       setIsProcessing(false);
+      // Retry after a delay on transient errors
+      setTimeout(() => router.refresh(), 2000);
     }
   };
 
@@ -75,7 +84,9 @@ export function MatchViewer({ match, initialMoves }: MatchViewerProps) {
 
   useEffect(() => {
     if (match.status === "in_progress" && !isHumanTurn && isLive && !processingRef.current) {
-      handleNextTurn();
+      // Add a small delay so React has time to settle before the next API call
+      const timer = setTimeout(() => handleNextTurn(), 300);
+      return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [match.status, isHumanTurn, isLive, moves.length]);

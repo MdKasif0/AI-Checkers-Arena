@@ -72,13 +72,15 @@ export async function getOpenRouterMove(
         },
         body: JSON.stringify({
           model: modelId,
-          messages: [{ role: "system", content: prompt }],
-          temperature: 0.2, // Low variance
-          max_tokens: 150, // Short responses only
-          seed: 42, // Enforce determinism
-          response_format: { type: "json_object" }, // Ask OpenRouter for JSON mode if supported
+          messages: [
+            { role: "system", content: "You are an expert International Draughts player. You MUST respond with ONLY a valid JSON object matching the schema: {\"move\": \"...\", \"reason\": \"...\"}. No markdown, no explanation outside the JSON." },
+            { role: "user", content: prompt }
+          ],
+          temperature: 0.1 + (attempts - 1) * 0.15, // Increase randomness on retries
+          max_tokens: 512, // Reasoning models need space to think
+          response_format: { type: "json_object" },
         }),
-        signal: AbortSignal.timeout(15000), // 15 second timeout
+        signal: AbortSignal.timeout(60000), // 60 second timeout for large models
       });
 
       const latencyMs = Date.now() - startTime;
